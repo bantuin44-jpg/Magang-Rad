@@ -71,10 +71,9 @@ input[type=radio]{width:auto;margin:3px 10px 0 0;accent-color:var(--p)}
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,createUserWithEmailAndPassword,setPersistence,inMemoryPersistence}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import{getDatabase,ref,get,set,update,push,remove,onValue,query,limitToLast}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-import{getStorage,ref as sref,uploadBytesResumable,getDownloadURL,deleteObject}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const cfg={apiKey:"AIzaSyBobRbjeXfFYj7JNMisex8L1fN6PhZA8e8",authDomain:"magang-3phg.firebaseapp.com",databaseURL:"https://magang-3phg-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"magang-3phg",storageBucket:"magang-3phg.firebasestorage.app",messagingSenderId:"291866452855",appId:"1:291866452855:web:030a4bbba05881c1a33772"};
-const fb=initializeApp(cfg),auth=getAuth(fb),db=getDatabase(fb),auth2=getAuth(initializeApp(cfg,'sec')),st=getStorage(fb);
+const fb=initializeApp(cfg),auth=getAuth(fb),db=getDatabase(fb),auth2=getAuth(initializeApp(cfg,'sec'));
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s),app=$('#app');
@@ -85,7 +84,12 @@ const fd=t=>t?new Date(t).toLocaleDateString('id-ID',{day:'numeric',month:'short
 const fdt=t=>t?new Date(t).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Belum pernah';
 const safe=u=>/^https?:\/\//i.test((u||'').trim())?u.trim():'';
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-const embed=u=>{let m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);if(m)return'https://www.youtube.com/embed/'+m[1];m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/);return m?`https://drive.google.com/file/d/${m[1]}/preview`:u};
+const embed=u=>{let m;
+  if(/youtu/.test(u)&&(m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/)))return'https://www.youtube.com/embed/'+m[1];
+  if(m=u.match(/docs\.google\.com\/(document|presentation|spreadsheets)\/d\/([\w-]+)/))return`https://docs.google.com/${m[1]}/d/${m[2]}/${m[1]==='presentation'?'embed?start=false&loop=false':'preview'}`;
+  if(m=u.match(/drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/))return`https://drive.google.com/embeddedfolderview?id=${m[1]}#list`;
+  if(m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/)||u.match(/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([\w-]+)/))return`https://drive.google.com/file/d/${m[1]}/preview`;
+  return u};
 const TL={video:'🎬 Video',pdf:'📄 PDF / Slide',text:'📝 Teks',img:'🖼️ Galeri radiograf',file:'📎 Dokumen (PDF/Word/PPT)'};
 const nf=()=>'<div class="card">Halaman tidak ditemukan.</div>';
 const empty=t=>`<div class="card mut">${t}</div>`;
@@ -167,7 +171,7 @@ V.learn=(mid,xid)=>{
   if(x.type==='video')body=!u?'<p class="mut">URL video tidak valid.</p>':/\.(mp4|webm|ogg)(\?|$)/i.test(u)?`<div class="media"><video controls src="${esc(u)}"></video></div>`:`<div class="media"><iframe src="${esc(embed(u))}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`;
   else if(x.type==='pdf')body=u?`<div class="media tall"><iframe src="${esc(embed(u))}"></iframe></div><p style="margin-top:8px"><a href="${esc(u)}" target="_blank" rel="noopener">Buka di tab baru ↗</a></p>`:'<p class="mut">URL dokumen tidak valid.</p>';
   else if(x.type==='img')body=`<div class="gal">${(x.text||'').split('\n').map(safe).filter(Boolean).map(s=>`<img loading="lazy" src="${esc(s)}" alt="Radiograf" data-a="zoom" data-u="${esc(s)}">`).join('')}</div><small style="margin-top:6px">Klik gambar untuk memperbesar.</small>`;
-  else if(x.type==='file'){const ex=(x.ext||'').toLowerCase();body=!u?'<p class="mut">File tidak valid.</p>':`<div class="media tall"><iframe src="${esc(ex==='pdf'?u:'https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent(u))}"></iframe></div><div class="row l" style="margin-top:10px"><a class="btn ghost sm" href="${esc(u)}" target="_blank" rel="noopener">⬇ Unduh / buka ${esc(x.name||'file')}</a><small>Jika pratinjau kosong, gunakan tombol unduh.</small></div>`}
+  else if(x.type==='file'){const ex=(x.ext||'').toLowerCase();body=!u?'<p class="mut">File tidak valid.</p>':`<div class="media tall"><iframe src="${esc(ex==='pdf'?u:'https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent(u))}"></iframe></div><div class="row l" style="margin-top:10px"><a class="btn ghost sm" href="${esc(u)}" target="_blank" rel="noopener">⬇ Unduh / buka ${esc(x.name||'file')}</a></div>`}
   else body=`<div class="prose">${esc(x.text).replace(/\n/g,'<br>')}</div>`;
   const pv=mt[j-1],nx=mt[j+1];
   return`<a class="back" href="#/mod/${mid}">← ${esc(m.title)}</a><h1>${esc(x.title)}</h1><p class="mut">${TL[x.type]||''} · Materi ${j+1} dari ${mt.length}</p>
@@ -240,7 +244,7 @@ V['a/mods']=()=>`<div class="row"><div><h1>Manajemen Modul</h1><p class="mut">At
 V['a/mod']=id=>{
   const m=S.mods.find(x=>x.id===id);if(!m)return nf();
   return`<a class="back" href="#/a/mods">← Semua modul</a><div class="row"><h1>${esc(m.icon||'')} ${esc(m.title)}</h1><button class="btn ghost" data-a="medit" data-id="${id}">⚙ Pengaturan</button></div><p class="mut">KKM ${m.kkm||70} · ${m.duration||15} menit · ${m.attempts||3}x percobaan · ${m.lock?'Terkunci berurutan':'Tidak dikunci'}</p>
-  <div class="row" style="margin-top:20px"><h3>Materi</h3><div class="row l"><button class="btn sm" data-a="fadd" data-id="${id}">⬆ Upload PDF / Word / PPT</button><button class="btn sm ghost" data-a="xadd" data-id="${id}">+ Video / Teks / Link</button></div></div>
+  <div class="row" style="margin-top:20px"><h3>Materi</h3><div class="row l"><button class="btn sm" data-a="fadd" data-id="${id}">＋ Dari Google Drive (PDF / Word / PPT)</button><button class="btn sm ghost" data-a="xadd" data-id="${id}">+ Video / Teks / Link</button></div></div>
   <div class="card tw">${mats(m).length?`<table>${mats(m).map(x=>`<tr><td>${TL[x.type]||x.type}</td><td>${esc(x.title)}</td><td><button class="btn sm dg" data-a="xdel" data-id="${id}" data-x="${x.id}">Hapus</button></td></tr>`).join('')}</table>`:'<p class="mut">Belum ada materi.</p>'}</div>
   <div class="row" style="margin-top:20px"><h3>Bank soal (${qs(m).length})</h3><div class="row l"><button class="btn sm" data-a="qadd" data-id="${id}">+ Soal</button><button class="btn sm ghost" data-a="qimp">⬆ Impor Excel</button></div></div>
   <input type="file" id="fq" hidden accept=".xlsx,.xls,.csv" data-c="impq" data-id="${id}"><small>Excel: kolom <b>Soal, A, B, C, D, Jawaban</b> (huruf A–D), <b>Pembahasan</b>, <b>Set</b> (pre/post).</small>
@@ -331,15 +335,10 @@ ACT.xadd=d=>form('Tambah materi',[{k:'type',l:'Jenis',t:'select',o:[['video','Vi
   const need=v.type==='video'||v.type==='pdf'?safe(v.url):v.type==='img'?v.text.split('\n').map(safe).filter(Boolean).length:v.text.trim();
   if(!need)throw new Error('Lengkapi isi materi sesuai jenisnya (URL harus diawali https://).');
   await push(ref(db,`modules/${d.id}/materials`),{type:v.type,title:v.title.trim(),url:v.url.trim(),text:v.text.trim()})});
-ACT.xdel=async d=>{if(!confirm('Hapus materi ini?'))return;const x=mats(S.mods.find(m=>m.id===d.id)).find(y=>y.id===d.x);await remove(ref(db,`modules/${d.id}/materials/${d.x}`));if(x?.path)deleteObject(sref(st,x.path)).catch(()=>{})};
-ACT.fadd=d=>form('Upload materi (PDF / Word / PPT)',[{k:'title',l:'Judul materi',req:1},{k:'file',l:'File (maks 25 MB)',t:'file',req:1,acc:'.pdf,.doc,.docx,.ppt,.pptx'}],async v=>{
-  const f=v.file;if(!f||!f.size)throw new Error('Pilih file terlebih dahulu.');const ex=(f.name.split('.').pop()||'').toLowerCase();
-  if(!['pdf','doc','docx','ppt','pptx'].includes(ex))throw new Error('Format harus PDF, Word, atau PowerPoint.');
-  if(f.size>25*1024*1024)throw new Error('Ukuran file maksimal 25 MB.');
-  const path=`materials/${d.id}/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`,t=uploadBytesResumable(sref(st,path),f);
-  await new Promise((ok,no)=>t.on('state_changed',n=>{const b=document.querySelector('.modal .btn:not(.ghost)');if(b)b.textContent='Mengunggah '+Math.round(n.bytesTransferred/n.totalBytes*100)+'%'},e=>no(new Error(e.code==='storage/unauthorized'?'Tidak punya izin upload. Periksa Storage Rules.':e.message)),ok));
-  const url=await getDownloadURL(t.snapshot.ref);
-  await push(ref(db,`modules/${d.id}/materials`),{type:'file',title:v.title.trim(),url,path,name:f.name,ext:ex,size:f.size});toast('File berhasil diunggah ✔')},'Upload');
+ACT.xdel=async d=>{if(confirm('Hapus materi ini?'))await remove(ref(db,`modules/${d.id}/materials/${d.x}`))};
+ACT.fadd=d=>form('Tambah materi dari Google Drive',[{k:'title',l:'Judul materi',req:1},{k:'url',l:'Link Google Drive (PDF / Word / PPT / folder)',t:'url',req:1,ph:'https://drive.google.com/file/d/...'}],async v=>{
+  const u=v.url.trim();if(!/^https:\/\/(drive|docs)\.google\.com\//.test(u))throw new Error('Link harus dari Google Drive / Google Docs (diawali https://drive.google.com atau https://docs.google.com).');
+  await push(ref(db,`modules/${d.id}/materials`),{type:'pdf',title:v.title.trim(),url:u,text:''});toast('Materi ditambahkan ✔')},'Tambah');
 ACT.qadd=d=>form('Tambah soal',[{k:'set',l:'Jenis',t:'select',o:[['post','Post-test'],['pre','Pre-test']]},{k:'q',l:'Pertanyaan',t:'textarea',r:3,req:1},...['A','B','C','D'].map(x=>({k:x,l:'Opsi '+x,req:x<'C'})),{k:'ans',l:'Jawaban benar',t:'select',o:['A','B','C','D'].map(x=>[x,x])},{k:'exp',l:'Pembahasan',t:'textarea',r:3}],async v=>{
   const opts=['A','B','C','D'].map(x=>v[x].trim()),ans='ABCD'.indexOf(v.ans);if(!opts[ans])throw new Error('Opsi untuk jawaban benar tidak boleh kosong.');
   await push(ref(db,`modules/${d.id}/questions`),{set:v.set,q:v.q.trim(),opts,ans,exp:v.exp.trim()})});
