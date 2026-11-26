@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+<!-- Bantu.IN Magang - Radiologi Training Portal · v1.1 (basis: v1.0 yang dikunci) -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
-<title>3PHG Magang · Radiology Training Portal</title>
+<title>Bantu.IN Magang · Radiologi Training Portal</title>
 <style>
 *{box-sizing:border-box;margin:0}
 :root{--bg:#f2faf9;--card:#fff;--card2:#fff;--line:#d6e7e5;--p:#0f766e;--p2:#14b8a6;--c:#0d9488;--t:#0f2a2e;--m:#5d7679;--ok:#059669;--bad:#e11d48;--w:#d97706;--sh:0 1px 2px #0f766e14,0 10px 28px #0f766e14}
@@ -141,7 +142,7 @@ const dlList=()=>S.dl.map(d=>{const n=Math.ceil((new Date(d.date+'T23:59:59')-Da
 V.dash=()=>{
   const uid=S.u.uid,ov=overall(uid),last=S.prog.last,lm=last&&S.mods.find(x=>x.id===last.mod),ok=lm&&mats(lm).some(x=>x.id===last.mat);
   const h=new Date().getHours(),g=h<11?'pagi':h<15?'siang':h<18?'sore':'malam';
-  return`<div class="banner"><div><span class="chip">Radiology Training Portal</span><h1>Selamat ${g}, ${esc((S.me.name||'').split(' ')[0])} 👋</h1><p>Teruskan perjalanan belajarmu hari ini.</p></div><div class="bn"><b>${ov}%</b><small>progres total</small></div></div>
+  return`<div class="banner"><div><span class="chip">Radiologi Training Portal</span><h1>Selamat ${g}, ${esc((S.me.name||'').split(' ')[0])} 👋</h1><p>Teruskan perjalanan belajarmu hari ini.</p></div><div class="bn"><b>${ov}%</b><small>progres total</small></div></div>
   ${(()=>{const r=S.attn[dk()]||{};return`<a class="card li" href="#/absen"><span class="ck">⏱️</span><div><b>Absensi hari ini</b><small>${r.in?`Masuk ${hm(r.in)}${r.out?` · Pulang ${hm(r.out)}`:' · belum absen pulang'}`:'Belum absen masuk — ketuk untuk absen'}</small></div></a>`})()}
   <div class="grid2"><div class="card hero"><div class="ring" style="--v:${ov}"><b>${ov}%</b></div><div><h3>Progres belajar</h3><p class="mut" style="margin-bottom:12px">${S.mods.filter(m=>info(uid,m).complete).length} dari ${S.mods.length} modul selesai</p>${ok?`<a class="btn cy" href="#/learn/${last.mod}/${last.mat}">▶ Lanjutkan belajar</a>`:'<a class="btn cy" href="#/mods">Mulai belajar</a>'}</div></div>
   <div class="card"><h3>⏰ Jadwal ujian &amp; deadline</h3>${dlList()}</div></div>
@@ -210,7 +211,7 @@ V.cert=id=>{
   const m=S.mods.find(x=>x.id===id);if(!m)return nf();const f=info(S.u.uid,m);if(!f.complete)return empty('Sertifikat tersedia setelah modul selesai dan lulus.');
   const pa=f.post.filter(a=>a.pass).sort((a,b)=>b.ts-a.ts)[0],ts=pa?pa.ts:Date.now();
   return`<div class="row noprint"><a href="#/results">← Kembali</a><button class="btn cy" onclick="print()">🖨️ Cetak / Simpan PDF</button></div>
-  <div class="cert"><div class="cb">SERTIFIKAT</div><p>Diberikan kepada</p><h2>${esc(S.me.name)}</h2><p>atas keberhasilan menyelesaikan modul pelatihan</p><h2 style="color:#0f766e;font-size:26px">${esc(m.title)}</h2><p>${pa?`Nilai post-test: <b>${pa.score}</b> · `:''}${fd(ts)}</p><p style="margin-top:18px;font-size:12px">No. CERT/${esc(id.slice(-4).toUpperCase())}/${S.u.uid.slice(0,5).toUpperCase()}/${new Date(ts).getFullYear()} · 3PHG Magang</p></div>`;
+  <div class="cert"><div class="cb">SERTIFIKAT</div><p>Diberikan kepada</p><h2>${esc(S.me.name)}</h2><p>atas keberhasilan menyelesaikan modul pelatihan</p><h2 style="color:#0f766e;font-size:26px">${esc(m.title)}</h2><p>${pa?`Nilai post-test: <b>${pa.score}</b> · `:''}${fd(ts)}</p><p style="margin-top:18px;font-size:12px">No. CERT/${esc(id.slice(-4).toUpperCase())}/${S.u.uid.slice(0,5).toUpperCase()}/${new Date(ts).getFullYear()} · Bantu.IN Magang</p></div>`;
 };
 
 V.qa=()=>`<h1>Tanya Trainer</h1><p class="mut">Ajukan pertanyaan seputar materi. Jawaban tampil di sini.</p><button class="btn" data-a="ask">+ Ajukan pertanyaan</button>
@@ -396,14 +397,14 @@ document.addEventListener('submit',async e=>{
 /* ---------- shell / routing ---------- */
 const NAV_U=[['dash','🏠','Beranda'],['mods','📚','Modul'],['results','📊','Nilai'],['absen','⏱️','Absen'],['qa','💬','Tanya'],['profile','👤','Profil']];
 const NAV_A=[['a/dash','📈','Dashboard'],['a/users','👥','Peserta'],['a/mods','📚','Modul'],['a/attn','⏱️','Absensi'],['a/report','🧾','Laporan'],['a/comm','📢','Komunikasi']];
-function login(){app.innerHTML=`<div class="lg"><div class="lgl"><div class="logo">3P</div><h2>Belajar radiologi,<br>lebih terarah.</h2><p>Portal pelatihan magang dengan modul terstruktur, evaluasi terukur, dan sertifikat otomatis.</p><ul><li>📚 Modul berurutan dengan materi video, PDF &amp; galeri radiograf</li><li>📝 Pre-test &amp; post-test dengan timer dan pembahasan</li><li>🎓 Sertifikat otomatis setelah lulus</li></ul></div><div class="lgr"><form id="lf" class="lgc"><h1>Masuk</h1><p class="mut">Gunakan email yang didaftarkan oleh admin.</p><label>Email<input name="e" type="email" required autocomplete="username"></label><label>Password<input name="p" type="password" required autocomplete="current-password"></label><button class="btn">Masuk</button><a class="lnk" data-a="forgot">Lupa password?</a></form></div></div>`}
+function login(){app.innerHTML=`<div class="lg"><div class="lgl"><div class="logo">BI</div><h2>Belajar radiologi,<br>lebih terarah.</h2><p>Portal pelatihan magang dengan modul terstruktur, evaluasi terukur, dan sertifikat otomatis.</p><ul><li>📚 Modul berurutan dengan materi video, PDF &amp; galeri radiograf</li><li>📝 Pre-test &amp; post-test dengan timer dan pembahasan</li><li>🎓 Sertifikat otomatis setelah lulus</li></ul></div><div class="lgr"><form id="lf" class="lgc"><h1>Masuk</h1><p class="mut">Gunakan email yang didaftarkan oleh admin.</p><label>Email<input name="e" type="email" required autocomplete="username"></label><label>Password<input name="p" type="password" required autocomplete="current-password"></label><button class="btn">Masuk</button><a class="lnk" data-a="forgot">Lupa password?</a></form></div></div>`}
 function draw(){
   if(!S.u||!S.ready)return;const p=R();let k=p[0]||'';
   if(S.admin){k=k==='a'?'a/'+(p[1]||'dash'):'a/dash'}else if(!V[k]||k.startsWith('a/'))k='dash';
   const args=k.startsWith('a/')?(p[0]==='a'?p.slice(2):[]):p.slice(1);
   const nav=S.admin?NAV_A:NAV_U,on=k==='a/mod'?'a/mods':['mod','learn','quiz','cert'].includes(k)?'mods':k;
   let body;try{body=(V[k]||V.dash)(...args)}catch(e){console.error(e);body='<div class="card">Terjadi kesalahan tampilan. Muat ulang halaman.</div>'}
-  app.innerHTML=`<div class="shell"><aside><div class="brand"><div class="logo">3P</div><div>3PHG Magang<small>Radiology Training</small></div></div>${nav.map(n=>`<a class="nv ${n[0]===on?'on':''}" href="#/${n[0]}"><span>${n[1]}</span>${n[2]}</a>`).join('')}<div class="sp"></div><div class="who">${esc(S.admin?'Administrator':S.me.name)}<small>${esc(S.u.email)}</small></div><button class="nv" data-a="out"><span>⎋</span>Keluar</button></aside><main>${body}</main></div>`;
+  app.innerHTML=`<div class="shell"><aside><div class="brand"><div class="logo">BI</div><div>Bantu.IN Magang<small>Radiologi Training · v1.1</small></div></div>${nav.map(n=>`<a class="nv ${n[0]===on?'on':''}" href="#/${n[0]}"><span>${n[1]}</span>${n[2]}</a>`).join('')}<div class="sp"></div><div class="who">${esc(S.admin?'Administrator':S.me.name)}<small>${esc(S.u.email)}</small></div><button class="nv" data-a="out"><span>⎋</span>Keluar</button></aside><main>${body}</main></div>`;
 }
 let raf=0;
 const live=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;if(R()[0]==='quiz'||document.querySelector('.ov')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||''))return;const y=scrollY;draw();scrollTo(0,y)})};
